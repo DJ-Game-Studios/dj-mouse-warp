@@ -27,10 +27,30 @@ import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import Clutter from 'gi://Clutter';
 import GLib from 'gi://GLib';
+import Gio from 'gi://Gio';
 import St from 'gi://St';
 
 const DEFAULT_ROW_TOLERANCE = 5;
 const DEFAULT_POLL_RATE_MS = 8; // ~120Hz pointer polling
+
+const IFACE_XML = `
+<node>
+  <interface name="org.gnome.Shell.Extensions.DjMouseWarp">
+    <method name="Status">
+      <arg type="s" direction="out" name="json"/>
+    </method>
+    <method name="SetEnabled">
+      <arg type="b" direction="in" name="enabled"/>
+      <arg type="b" direction="out" name="newState"/>
+    </method>
+    <method name="Toggle">
+      <arg type="b" direction="out" name="newState"/>
+    </method>
+    <method name="ResetCounters">
+      <arg type="b" direction="out" name="success"/>
+    </method>
+  </interface>
+</node>`;
 
 export default class MouseWarpExtension extends Extension {
     enable() {
@@ -87,8 +107,77 @@ export default class MouseWarpExtension extends Extension {
 
         this._applyTopBar();
 
+        this._warpCount = 0;
+        this._lastWarp = null;
+        this._registerDBus();
+
         if (this._debugLogging)
             log(`[dj-mouse-warp] enabled — ${Main.layoutManager.monitors.length} monitor(s), polling at ${this._pollRateMs}ms`);
+    }
+
+    _registerDBus() {
+        try {
+            this._dbusId = Gio.DBus.session.register_object(
+                '/org/gnome/Shell/Extensions/DjMouseWarp',
+                Gio.DBusNodeInfo.new_for_xml(IFACE_XML).interfaces[0],
+                (connection, sender, path, iface, method, params, invocation) => {
+                    try {
+                        if (method === 'Status') {
+                            invocation.return_value(new GLib.Variant('(s)', [this._statusJson()]));
+                        } else if (method === 'SetEnabled') {
+                            const enabled = params.deep_unpack()[0];
+                            this._settings.set_boolean('is-enabled', enabled);
+                            invocation.return_value(new GLib.Variant('(b)', [enabled]));
+                        } else if (method === 'Toggle') {
+                            const newState = !this._settings.get_boolean('is-enabled');
+                            this._settings.set_boolean('is-enabled', newState);
+                            invocation.return_value(new GLib.Variant('(b)', [newState]));
+                        } else if (method === 'ResetCounters') {
+                            this._warpCount = 0;
+                            this._lastWarp = null;
+                            invocation.return_value(new GLib.Variant('(b)', [true]));
+                        } else {
+                            invocation.return_error_literal(
+                                Gio.DBusError, Gio.DBusError.UNKNOWN_METHOD,
+                                `Unknown method: ${method}`);
+                        }
+                    } catch (e) {
+                        log(`[dj-mouse-warp] dbus.${method} threw: ${e.message || e}`);
+                        invocation.return_error_literal(
+                            Gio.DBusError, Gio.DBusError.FAILED,
+                            `${method}: ${e.message || e}`);
+                    }
+                },
+                null,
+                null,
+            );
+        } catch (e) {
+            log(`[dj-mouse-warp] dbus registration failed: ${e.message || e}`);
+        }
+    }
+
+    _statusJson() {
+        const monitors = (Main.layoutManager?.monitors || []).map((m, i) => ({
+            index: i, x: m.x, y: m.y, w: m.width, h: m.height,
+        }));
+        return JSON.stringify({
+            is_enabled: this._settings.get_boolean('is-enabled'),
+            warp_enabled: this._settings.get_boolean('warp-enabled'),
+            overlap_remap_enabled: this._settings.get_boolean('overlap-remap-enabled'),
+            overlay_enabled: this._settings.get_boolean('overlay-enabled'),
+            click_flash_enabled: this._settings.get_boolean('click-flash-enabled'),
+            visual_feedback_enabled: this._settings.get_boolean('visual-feedback-enabled'),
+            debug_logging: this._settings.get_boolean('debug-logging'),
+            hide_top_bar: this._settings.get_boolean('hide-top-bar'),
+            edge_tolerance: this._settings.get_int('edge-tolerance'),
+            pressure_threshold_ms: this._settings.get_int('pressure-threshold-ms'),
+            warp_cooldown_ms: this._settings.get_int('warp-cooldown-ms'),
+            poll_rate_ms: this._settings.get_int('poll-rate-ms'),
+            row_tolerance: this._settings.get_int('row-tolerance'),
+            warp_count: this._warpCount,
+            last_warp: this._lastWarp,
+            monitors,
+        });
     }
 
     _loadSettings() {
@@ -144,6 +233,13 @@ export default class MouseWarpExtension extends Extension {
     disable() {
         this._restoreTopBar();
         this._resetMotionState();
+
+        if (this._dbusId) {
+            try {
+                Gio.DBus.session.unregister_object(this._dbusId);
+            } catch (_) {}
+            this._dbusId = null;
+        }
 
         if (this._pollTimerId) {
             GLib.source_remove(this._pollTimerId);
@@ -455,6 +551,8 @@ export default class MouseWarpExtension extends Extension {
             // Update tracking to warped position immediately
             this._lastX = x;
             this._lastY = y;
+            this._warpCount = (this._warpCount || 0) + 1;
+            this._lastWarp = {x, y, ts: GLib.get_real_time()};
         } catch (e) {
             log(`[dj-mouse-warp] warp error: ${e.message}`);
             this._warpCooldownUntil = 0;

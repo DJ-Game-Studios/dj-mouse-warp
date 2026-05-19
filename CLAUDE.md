@@ -21,13 +21,15 @@ bash tests/run_tests.sh                       # Same as make test
 docker compose run tests                      # Run tests in container
 
 # Via dj CLI
-dj mouse warp on          # Enable extension
-dj mouse warp off         # Disable extension
-dj mouse warp status      # Show extension state
-dj mouse warp visualize   # Open visualizer with live settings injected
-dj mouse warp reload      # make install + logout (fast debug cycle)
-dj mouse status           # Full mouse config + warp state
-dj session logout         # Log out GNOME session
+dj mouse warp on              # Enable extension
+dj mouse warp off             # Disable extension
+dj mouse warp toggle          # Flip is-enabled (D-Bus Toggle method; v2+)
+dj mouse warp status          # Show extension state (text)
+dj mouse warp status --json   # JSON via D-Bus Status() — settings + counters + monitors (v2+)
+dj mouse warp visualize       # Open visualizer with live settings injected
+dj mouse warp reload          # make install + logout (fast debug cycle)
+dj mouse status               # Full mouse config + warp state
+dj session logout             # Log out GNOME session
 ```
 
 ## How It Works
@@ -69,6 +71,22 @@ Makefile           # install, uninstall, package, test, compile-schemas
 | `_warp(x, y)` | Executes Clutter warp + cooldown + visual feedback |
 | `_onButtonPress()` | Click flash handler (single-monitor bypass) |
 | `_resetMotionState()` | Clears pressure, position, cooldown — called on disable/monitors-changed |
+
+## D-Bus surface (v2+)
+
+Registered at `/org/gnome/Shell/Extensions/DjMouseWarp`, interface `org.gnome.Shell.Extensions.DjMouseWarp`:
+
+| Method | Signature | Purpose |
+|---|---|---|
+| `Status` | `() → s` | JSON dump of all settings, live warp counter, last-warp coords, monitor geometry |
+| `SetEnabled` | `(b) → b` | Set `is-enabled`; returns new state |
+| `Toggle` | `() → b` | Flip `is-enabled`; returns new state |
+| `ResetCounters` | `() → b` | Reset warp counter + last-warp |
+
+Wired into:
+- `dj mouse warp toggle` / `dj mouse warp status --json` (dj-cli)
+- `dj_mouse_warp_status` / `dj_mouse_warp_toggle` (dj-mcp)
+- `dj-gnome-status` top-bar quick-actions submenu
 
 ## Defensive Guards
 
