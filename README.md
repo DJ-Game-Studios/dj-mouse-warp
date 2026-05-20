@@ -35,17 +35,14 @@ The result: moving the mouse straight up from the far-right of your desk monitor
 ## Install
 
 ```bash
-make install
-gnome-extensions enable dj-mouse-warp@djmsqrvve
+./install.sh              # symlink + compile schemas + enable
+./install.sh --uninstall  # disable + unlink (source untouched)
+./install.sh --reload     # disable + enable cycle (no symlink change)
 ```
 
-Then log out and back in (Wayland requires a session restart).
+Or via the umbrella `~/dev/gnome-extensions/install.sh` to install **all** dj-* extensions at once (delegates to each member's `install.sh`).
 
-To uninstall:
-
-```bash
-make uninstall
-```
+After install, log out + back in on Wayland (or `Alt+F2` `r` on X11) for GNOME Shell to pick up the symlink. UUID: `dj-mouse-warp@djmsqrvve`.
 
 ## Supported Configurations
 
