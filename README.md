@@ -44,6 +44,19 @@ Or via the umbrella `~/dev/gnome-extensions/install.sh` to install **all** dj-* 
 
 After install, log out + back in on Wayland (or `Alt+F2` `r` on X11) for GNOME Shell to pick up the symlink. UUID: `dj-mouse-warp@djmsqrvve`.
 
+## Per-host enablement
+
+This extension is only useful on multi-monitor hosts. Per-node policy:
+
+| Node | Monitors | Status | Rationale |
+|---|---|---|---|
+| Node-2 (main-pc) | TV + 2× 27" desk = 3 monitors of differing widths | **Enabled** | The canonical use case — proportional remap between TV row and desk row. |
+| Node-6 (Corsair AI Workstation) | single monitor | **Intentionally NOT enabled** (uninstalled 2026-05-21 per Re Arc Phase 08-D) | Single-monitor box; the extension's `_onPoll()` no-ops on `monitors.length < 2` anyway, but the symlink + enable still consume Shell-init cycles for no benefit. |
+| Node-3 (mac-pro-2013) | macOS — N/A | Not applicable | GNOME extensions don't run on macOS; cursor warping there is `dj mouse warp` via different surface. |
+| Node-4 (macbook-pro-2015) | macOS — N/A | Not applicable | Same. |
+
+When Node-6 ever goes multi-monitor: `~/dev/gnome-extensions/dj-mouse-warp/install.sh` reinstalls in seconds. The repo is already cloned at `~/dev/gnome-extensions/dj-mouse-warp/`; only the symlink + enable needs flipping.
+
 ## Supported Configurations
 
 Mouse Warp is tested against and designed for a wide range of monitor setups. All coordinate math uses GNOME's logical pixel space from `Main.layoutManager.monitors` — no hardcoded assumptions about positions, resolutions, or orientations.
