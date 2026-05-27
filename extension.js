@@ -30,6 +30,8 @@ import GLib from 'gi://GLib';
 import Gio from 'gi://Gio';
 import St from 'gi://St';
 
+import * as Theming from './theming.js';
+
 const DEFAULT_ROW_TOLERANCE = 5;
 const DEFAULT_POLL_RATE_MS = 8; // ~120Hz pointer polling
 
@@ -455,7 +457,7 @@ export default class MouseWarpExtension extends Extension {
         try {
             if (!this._debugLabel) {
                 this._debugLabel = new St.Label({
-                    style: 'font-size: 14px; color: white; background-color: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 4px;',
+                    style: Theming.css({ size: 'md', fg: 'fg', bg: 'shadow', padding: 'sm', radius: 'sm' }),
                     reactive: false,
                     can_focus: false,
                 });
@@ -513,7 +515,7 @@ export default class MouseWarpExtension extends Extension {
         const [x, y] = global.get_pointer();
         const size = 8;
         const widget = new St.Widget({
-            style: `border-radius: ${size / 2}px; background-color: rgba(255,255,255,0.9);`,
+            style: `border-radius: ${size / 2}px; background-color: ${Theming.THEME.colors.fg};`,
             x: x - size / 2,
             y: y - size / 2,
             width: size,
@@ -563,7 +565,7 @@ export default class MouseWarpExtension extends Extension {
         try {
             const size = 40;
             const widget = new St.Widget({
-                style: `border-radius: ${size/2}px; background-color: rgba(136, 204, 255, 0.4);`,
+                style: `border-radius: ${size/2}px; background-color: ${Theming.THEME.colors.sky}; opacity: 0.4;`,
                 x: x - size / 2,
                 y: y - size / 2,
                 width: size,

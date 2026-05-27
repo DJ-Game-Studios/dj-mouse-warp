@@ -2,7 +2,12 @@
   "uuid": "dj-mouse-warp@djmsqrvve",
   "name": "DJ Mouse Warp",
   "description": "Proportional mouse cursor mapping between monitors of different sizes. D-Bus surface for status/toggle. The Linux answer to LittleBigMouse.",
-  "shell-version": ["47", "48", "49", "50"],
-  "version": 2,
+  "shell-version": [
+    "47",
+    "48",
+    "49",
+    "50"
+  ],
+  "version": 4,
   "url": "https://github.com/djmsqrvve/dj-mouse-warp"
 }
