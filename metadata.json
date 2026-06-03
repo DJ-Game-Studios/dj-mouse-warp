@@ -9,5 +9,7 @@
     "50"
   ],
   "version": 7,
-  "url": "https://github.com/djmsqrvve/dj-mouse-warp"
+  "url": "https://github.com/DJ-Game-Studios/dj-mouse-warp",
+  "license": "MIT",
+  "settings-schema": "org.gnome.shell.extensions.dj-mouse-warp"
 }

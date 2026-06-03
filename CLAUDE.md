@@ -4,7 +4,7 @@ GNOME Shell extension for proportional cursor mapping between monitors of differ
 
 ## Git Topology
 
-Standalone repo. Remote: `origin https://github.com/djmsqrvve/dj-mouse-warp`
+Standalone repo. Remote: `origin https://github.com/DJ-Game-Studios/dj-mouse-warp`
 
 ## Stack
 
@@ -54,8 +54,7 @@ tests/             # 537 assertions across 3 test files (Node.js), 80 test group
   test_extension_logic.js  # 397 assertions — core logic, 80 test groups
   test_metadata.js         # 76 assertions — file structure, method signatures, guards
 Dockerfile         # Node 20 + libglib2.0-dev for containerized testing
-docker-compose.yml # docker compose run tests
-.github/workflows/ # CI on push/PR
+docker-compose.yml # docker compose run tests (local only — NO .github/workflows; fleet CI rule)
 Makefile           # install, uninstall, package, test, compile-schemas
 ```
 
@@ -85,7 +84,7 @@ Registered at `/org/gnome/Shell/Extensions/DjMouseWarp`, interface `org.gnome.Sh
 
 Wired into:
 - `dj mouse warp toggle` / `dj mouse warp status --json` (dj-cli)
-- `dj_mouse_warp_status` / `dj_mouse_warp_toggle` (dj-mcp)
+- `dj_mouse_warp_status` / `dj_mouse_warp_toggle` (desktopmng MCP — `mcp/core/desktopmng`)
 - `dj-gnome-status` top-bar quick-actions submenu
 
 ## Defensive Guards
