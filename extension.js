@@ -214,7 +214,16 @@ export default class MouseWarpExtension extends Extension {
     }
 
     _startPolling() {
-        this._pollTimerId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, this._pollRateMs, () => {
+        // PRIORITY_DEFAULT_IDLE (200), not PRIORITY_DEFAULT (0). At default
+        // priority this source outranks Clutter's redraw (~120) and, at the
+        // default 8ms rate, gets 125 chances per second to preempt a frame.
+        // Pointer convenience must never outrank drawing.
+        //
+        // Trade-off: under a saturated main loop, idle-priority polls can be
+        // delayed, so edge-pressure detection may feel less crisp. If that
+        // shows up in practice, raise _pollRateMs (8ms is ~120Hz, far finer
+        // than needed for edge detection) rather than restoring the priority.
+        this._pollTimerId = GLib.timeout_add(GLib.PRIORITY_DEFAULT_IDLE, this._pollRateMs, () => {
             try {
                 this._onPoll();
             } catch (e) {
