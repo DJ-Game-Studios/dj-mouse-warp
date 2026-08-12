@@ -2,6 +2,8 @@
 
 A GNOME Shell extension that makes cursor movement feel natural across monitor rows with different widths.
 
+Built by [DJ Game Studios](https://github.com/DJ-Game-Studios) for the Linux workstations used to develop, test, and operate our games—and released because the same monitor-layout problem affects plenty of other setups.
+
 When a smaller display sits above or below a wider monitor row, GNOME can leave parts of the boundary unreachable. DJ Mouse Warp maps the cursor proportionally between rows, eliminating those dead zones on Wayland and X11.
 
 ## Features
