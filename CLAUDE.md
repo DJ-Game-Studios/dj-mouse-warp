@@ -29,8 +29,10 @@ dj mouse warp status --json   # JSON via D-Bus Status() — settings + counters 
 dj mouse warp visualize       # Open visualizer with live settings injected
 dj mouse warp reload          # make install + logout (fast debug cycle)
 dj mouse status               # Full mouse config + warp state
-dj session logout             # Log out GNOME session
+dj session logout             # Log out GNOME session (box-2 ONLY; never run on box-1!)
 ```
+
+> **⚠️ Testing & Reload Notice:** Never log out or reload extensions on **box-1** (DJ's live workstation). Perform live reload testing on headless **box-2** over the fleet bridge (`~/dev/dj-fleet-comms/bridges/from-box-1/to-box-2.sh`) where GDM can be safely restarted (`sudo systemctl restart gdm`).
 
 ## How It Works
 
