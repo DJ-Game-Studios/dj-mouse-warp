@@ -99,6 +99,18 @@ export function esc(text) {
         .replace(/>/g, '&gt;');
 }
 
+/**
+ * Unified Top-Bar Pango formatter for DJ GNOME extension indicators.
+ * Produces: "<dot>  [<TAG>: <metrics>]" with themed dim brackets and tag.
+ */
+export function formatTopBar(dotEmoji, tag, metricsTag) {
+    const dimColor = THEME.colors.dim;
+    return `${dotEmoji}  <span color="${dimColor}">[</span>` +
+           `<span color="${dimColor}" weight="bold">${esc(tag)}</span>` +
+           `<span color="${dimColor}">:</span> ${metricsTag}` +
+           `<span color="${dimColor}">]</span>`;
+}
+
 // ─── CSS Generation ──────────────────────────────────────────────────
 
 /**
